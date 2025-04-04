@@ -19,3 +19,5 @@ for sl in $symlinks; do
         echo $sl
     fi
 done
+
+exit 0
