@@ -7,10 +7,15 @@ fi
 
 while read -r user home; do
 
+    if [[ -z "$user" || -z "$home" ]]; then
+        continue
+    fi
+
     #bits=$(stat -c %A "${home}")
     #echo "${bits}"
     if [[ ! -d "$home" ]]; then
         echo "${user}'s home directory ${home} doesn't exist"
+        continue
     fi
 
     bits=$(stat -c %A "${home}")
