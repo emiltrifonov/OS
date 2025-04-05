@@ -5,7 +5,7 @@ if [[ $# -ne 1 ]]; then
     exit 1
 fi
 
-if [[ $(id -u) -eq 0 ]]; then
+if [[ $(id -u) -ne 0 ]]; then
     echo "Script must be executed by root"
     exit 2
 fi
