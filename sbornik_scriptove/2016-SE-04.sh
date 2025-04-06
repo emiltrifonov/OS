@@ -8,8 +8,13 @@ fi
 reg=^[1-9][0-9]*$
 
 if [[ ! $1 =~ $reg || ! $2 =~ $reg ]]; then
-    echo "Both arguments must be valid numbers"
+    echo "Both arguments must be valid positive numbers"
     exit 2
+fi
+
+if [[ $1 -gt $2 ]]; then
+    echo "First agrument must be smaller than the second"
+    exit 3
 fi
 
 mkdir -p ./a ./b ./c
