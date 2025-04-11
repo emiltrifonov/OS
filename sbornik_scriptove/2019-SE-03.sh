@@ -24,7 +24,7 @@ while IFS= read -r arch; do
     fbirth="$(echo "$data" | cut -d' ' -f1)"
     lastmod="$(echo "$data" | cut -d' ' -f2)"
     mkdir -p "temp"
-    if [[ 0 -lt 1 || "$fbirth" -gt "$lastx" || "$lastmod" -gt "$lastx" ]]; then
+    if [[ "$fbirth" -gt "$lastx" || "$lastmod" -gt "$lastx" ]]; then
         cd "temp"
         tar -xzf "../$arch" >&2
         if [[ $? -eq 0 ]]; then
