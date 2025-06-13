@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     }
 
     char text[5];
-    snprintf(text, 5, "%u\n", byte);
+    snprintf(text, 5, "%u\n", bmax);
     if (write(1, text, 5) != 5) {
         err(4, "cant write");
     }
