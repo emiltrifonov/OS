@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     int pfd[2];
     if (pipe(pfd) < 0) { err(2, "cant pipe"); }
 
-    int pid = fork();
+    pid_t pid = fork();
     if (pid < 0) { err(3, "cant fork"); }
 
     if (pid == 0){
