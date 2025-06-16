@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
         if (write(pfd[1], argv[1], len) != len) { err(6, "cant write"); }
 
         close(pfd[1]);
+        wait(0);
     }
 
     return 0;
