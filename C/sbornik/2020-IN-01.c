@@ -71,6 +71,13 @@ int main(int argc, char* argv[])
 
     header h;
     if (read(patchfd, &h, sizeof(h)) != sizeof(h)) { err(5, "cant read"); }
+    if (h.magic != 0xEFBEADDE) {
+        errx(14, "Invalid magic number");
+    }
+    if (h.header_version != 0x01) {
+        errx(15, "Unsupported header version");
+    }
+
     if (h.data_version == 0) {
         dataVersion0(patchfd, f1d, f2d);
     }
@@ -78,5 +85,9 @@ int main(int argc, char* argv[])
         dataVersion1(patchfd, f1d, f2d);
     }
 
+    close(patchfd);
+    close(f1d);
+    close(f2d);
+    
     return 0;
 }
