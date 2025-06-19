@@ -1,0 +1,103 @@
+#include <unistd.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <err.h>
+#include <string.h>
+#include <stdint.h>
+#include <sys/wait.h>
+
+//find {dir} -type f -printf "%f %T@\n" | sort -nr -k2 -t' ' | head -n 1 | cut -d' ' -f1
+
+int main(int argc, char* argv[])
+{
+    if (argc != 2) { errx(1, "bad args"); }
+
+    int pfd1[2], pfd2[2], pfd3[2];
+    if (pipe(pfd1) < 0) { err(2, "cant pipe"); }
+    if (pipe(pfd2) < 0) { err(3, "cant pipe"); }
+    if (pipe(pfd3) < 0) { err(4, "cant pipe"); }
+
+    pid_t pid = fork();
+    if (pid < 0) { err(5, "cant fork"); }
+
+    if (pid == 0) {
+        close(pfd1[0]);
+        close(pfd2[0]);
+        close(pfd2[1]);
+        close(pfd3[0]);
+        close(pfd3[1]);
+
+        if (dup2(pfd1[1], 1) < 0) { err(6, "cant dup"); }
+        close(pfd1[1]);
+
+        execlp("find", "find", argv[1], "-type", "f",  "-printf", "%f %T@\n", (char*)NULL);
+        err(7, "cant exec");
+    }
+
+    pid = fork();
+    if (pid < 0) { err(8, "cant fork"); }
+
+    if (pid == 0) {
+        close(pfd1[1]);
+        close(pfd2[0]);
+        close(pfd3[0]);
+        close(pfd3[1]);
+
+        if (dup2(pfd1[0], 0) < 0) { err(9, "cant dup"); }
+        close(pfd1[0]);
+        if (dup2(pfd2[1], 1) < 0) { err(10, "cant dup"); }
+        close(pfd2[1]);
+
+        execlp("sort", "sort", "-nr", "-k2", "-t ", (char*)NULL);
+        err(11, "cant exec");
+    }
+
+    pid = fork();
+    if (pid < 0) { err(12, "cant fork"); }
+
+    if (pid == 0) {
+        close(pfd1[0]);
+        close(pfd1[1]);
+        close(pfd2[1]);
+        close(pfd3[0]);
+
+        if (dup2(pfd2[0], 0) < 0) { err(13, "cant dup"); }
+        close(pfd2[0]);
+        if (dup2(pfd3[1], 1) < 0) { err(14, "cant dup"); }
+        close(pfd3[1]);
+
+        execlp("head", "head", "-n1", (char*)NULL);
+        err(15, "cant exec");
+    }
+
+    pid = fork();
+    if (pid < 0) { err(16, "cant fork"); }
+
+    if (pid == 0) {
+        close(pfd1[0]);
+        close(pfd1[1]);
+        close(pfd2[0]);
+        close(pfd2[1]);
+        close(pfd3[1]);
+
+        if (dup2(pfd3[0], 0) < 0) { err(17, "cant dup"); }
+        close(pfd3[0]);
+
+        execlp("cut", "cut", "-d ", "-f1", (char*)NULL);
+        err(18, "cant exec");
+    }
+
+    close(pfd1[0]); close(pfd1[1]);
+    close(pfd2[0]); close(pfd2[1]);
+    close(pfd3[0]); close(pfd3[1]);
+
+    wait(0);
+    wait(0);
+    wait(0);
+    wait(0);
+
+    return 0;
+}
