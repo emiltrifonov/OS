@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     if (dup2(fifo, 0) < 0) { err(3, "cant dup"); }
     close(fifo);
 
-    execlp(argv[1], argv[1], (char*)NULL);
+    execl(argv[1], argv[1], (char*)NULL);
     err(4, "cant exec");
 
     return 0;
