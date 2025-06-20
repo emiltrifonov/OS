@@ -1,3 +1,5 @@
+// bannat v putty chast 1
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -17,8 +19,9 @@ int main(int argc, char* argv[])
 
   if (strlen(argv[1]) != 1 || !isdigit(argv[1][0]) || strlen(argv[2]) != 1 || !isdigit(argv[2][0])) { errx(2, "bad args"); }
 
-  int pfd[2];
-  if (pipe(pfd) < 0) { err(3, "cant pipe"); }
+  int p2c[2], c2p[2];
+  if (pipe(p2c) < 0) { err(3, "cant pipe"); }
+  if (pipe(c2p) < 0) { err(31, "cant pipe"); }
   
   uint8_t N = argv[1][0] - '0', D = argv[2][0] - '0';
   const char *DING = "DING", *DONG = "DONG";
@@ -27,28 +30,34 @@ int main(int argc, char* argv[])
   if (pid < 0) { err(4, "cant fork"); }
 
   if (pid == 0) {
+    close(p2c[1]);
+    close(c2p[0]);
+    
     char buf[5];
     for (int i = 0; i < N; i++) {
-      if (read(pfd[0], buf, 4) != 4) { err(10, "cant read"); }
+      if (read(p2c[0], buf, 4) != 4) { err(10, "cant read"); }
       if (write(1, DONG, 4) != 4) { err(8, "cant write"); }
-      if (write(pfd[1], DONG, 4) != 4) { err(9, "cant write"); }
+      if (write(c2p[1], DONG, 4) != 4) { err(9, "cant write"); }
     }
 
-    close(pfd[0]);
-    close(pfd[1]);
+    close(p2c[0]);
+    close(c2p[1]);
     exit(0);
   }
 
+  close(p2c[0]);
+  close(c2p[1]);
+  
   char buf[5];
   for (int i = 0; i < N; i++) {
       if (write(1, DING, 4) != 4) { err(8, "cant write"); }
-      if (write(pfd[1], DING, 4) != 4) { err(9, "cant write"); }
-      if (read(pfd[0], buf, 4) != 4) { err(10, "cant read"); }
+      if (write(p2c[1], DING, 4) != 4) { err(9, "cant write"); }
+      if (read(c2p[0], buf, 4) != 4) { err(10, "cant read"); }
       sleep(D);
   }
 
-  close(pfd[0]);
-  close(pfd[1]);
+  close(p2c[1]);
+  close(c2p[0]);
 
   wait(0);
   return 0;
