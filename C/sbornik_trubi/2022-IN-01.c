@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   if (pid == 0) {
     char buf[5];
     for (int i = 0; i < N; i++) {
-      if (read(pfd[0], buf, 4) != 4) { err(10, "cant write"); }
+      if (read(pfd[0], buf, 4) != 4) { err(10, "cant read"); }
       if (write(1, DONG, 4) != 4) { err(8, "cant write"); }
       if (write(pfd[1], DONG, 4) != 4) { err(9, "cant write"); }
     }
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < N; i++) {
       if (write(1, DING, 4) != 4) { err(8, "cant write"); }
       if (write(pfd[1], DING, 4) != 4) { err(9, "cant write"); }
-      if (read(pfd[0], buf, 4) != 4) { err(10, "cant write"); }
+      if (read(pfd[0], buf, 4) != 4) { err(10, "cant read"); }
       sleep(D);
   }
 
