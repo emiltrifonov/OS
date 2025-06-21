@@ -1,5 +1,3 @@
-// bannat v putty chast 2
-
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -16,25 +14,24 @@
 #include <limits.h>
 
 const char* L[] = { "tic", "tac", "toe\n" };
-char filler = "\0";
 
-void loop(int in, int out, int counter, int index, int increment, int max_words) {
-  char buf;
+// counter shows which word we are CURRENTLY writing (so it starts from 2 since the parent writes the first one)
+void loop(int in, int out, int max_words) {
+  int counter;
+  int index;
   int read_size;
-  
-  while((read_size = read(in, &buf, 1)) > 0) {
+
+  while((read_size = read(in, &counter, sizeof(counter))) > 0) {
     if (counter > max_words) {
       close(in);
       close(out);
       exit(0);
     }
-    
-    if (write(1, L[index], strlen(L[index])) != strlen(L[index])) ( err(7, "cant write"); }
 
-    counter += increment;
-    index = (index + increment) % 3;
-    
-    if (write(out, &filler, 1) != 1) ( err(8, "cant write"); }    
+    index = (counter - 1) % 3;
+    if (write(1, L[index], strlen(L[index])) != strlen(L[index])) { err(7, "cant write"); }
+    counter++;
+    if (write(out, &counter, sizeof(counter)) != sizeof(counter)) { err(8, "cant write"); }
   }
   if (read_size < 0) { err(9, "cant read"); }
 }
@@ -63,24 +60,24 @@ int main(int argc, char *argv[])
         if (pfd[j][0] != in) { close(pfd[j][0]); }
         if (pfd[j][1] != out) { close(pfd[j][1]); }
       }
-  
-      loop(in, out, 2, (j + 1) % 3, NC, WC);
-  
+
+      loop(in, out, WC);
+
       return 0;
     }
   }
 
   for (int j = 0; j < NC; j++) {
       close(pfd[j][0]);
-      if (j != 0) { close(pfd[j][1]); }
+      if ( j != 0 ) { close(pfd[j][1]); }
   }
 
-  if (write(pfd[0][1], L[0], 3) != 3) { err(6, "cant write"); }
+  if (write(1, L[0], strlen(L[0])) != strlen(L[0])) { err(6, "cant write"); }
+  int count = 2;
+  if (write(pfd[0][1], &count, sizeof(count)) != sizeof(count)) { err(18, "cant write"); }
   close(pfd[0][1]);
-  
-  for (int j = 0; j < NC; j++) {
-      wait(0);
-  }
-  
+
+  for (int j = 0; j < NC; j++) { wait(0); }
+
   return 0;
 }
